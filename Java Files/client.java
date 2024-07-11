@@ -3,34 +3,33 @@ import java.net.*;
 import java.util.Scanner;
 
 public class Client {
-    private static final String SERVER_ADDRESS = "localhost"; // Change this to the server's IP address if running on a different machine
+    private static final String SERVER_ADDRESS = "localhost";
     private static final int SERVER_PORT = 12345;
 
     public static void main(String[] args) {
-        try (Socket socket = new Socket(SERVER_ADDRESS, SERVER_PORT);
-             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-             Scanner scanner = new Scanner(System.in)) {
+        try(Socket Socket = new Socket(SERVER_ADDRESS, SERVER_PORT)){
 
-            // Read welcome message and commands from the server
+            BufferedReader in = new BufferedReader(new InputStreamReader(Socket.getInputStream()));
+            PrintWriter out = new PrintWriter(Socket.getOutputStream(), true);
+
             String line;
-            while ((line = in.readLine()) != null && !line.isEmpty()) {
+            while ((line = in.readLine()) != null) {
                 System.out.println(line);
+                if (line.equals("3. ViewChallenges")) {
+                    break;
+                }
             }
-
-            // Interact with the server based on user input
+            Scanner scanner = new Scanner(System.in);
             while (true) {
                 System.out.print("> ");
                 String command = scanner.nextLine();
                 out.println(command);
 
-                if (command.equalsIgnoreCase("exit")) {
-                    break;
-                }
-
-                // Read and display the server's response
-                while ((line = in.readLine()) != null && !line.isEmpty()) {
+                while ((line = in.readLine()) != null) {
                     System.out.println(line);
+                    if(line.isEmpty() || line.equals(">")){
+                        break;
+                    }
                 }
             }
 
@@ -39,4 +38,3 @@ public class Client {
         }
     }
 }
-
