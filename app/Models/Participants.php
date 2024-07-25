@@ -33,4 +33,15 @@ class Participants extends Model
         return $this->hasMany(Attempts::class);
     }
 
+    protected $fillable = ['username','firstname','lastname','email','date_of_birth','school_id'] ;
+    public function school()
+    {
+        return $this->belongsTo(School::class);
+    
+}
+public function results()
+{
+    return $this->hasMany(Results::class);
+}
+
 }

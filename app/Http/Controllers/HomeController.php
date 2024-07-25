@@ -3,26 +3,27 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Challenges;
+use App\Models\School;
+use App\Models\Participants;
 
 class HomeController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
     public function __construct()
     {
         $this->middleware('auth');
     }
 
-    /**
-     * Show the application dashboard.
-     *
-     * @return \Illuminate\Contracts\Support\Renderable
-     */
+    //method to display total registered schools, participants and challenges
     public function index()
     {
-        return view('dashboard');
+
+        $schoolsCount = School::count();
+        $participantsCount = Participants::count();
+        $challengesCount = Challenges::count();
+
+        $upcoming_challenges = Challenges::where('start_date', '>', now())->get();
+        return view('dashboard', compact('upcoming_challenges', 'schoolsCount', 'participantsCount', 'challengesCount'));
     }
+
 }
