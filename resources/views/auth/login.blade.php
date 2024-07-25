@@ -4,7 +4,6 @@
     <div class="full-page section-image" data-color="black" data-image="{{ asset('light-bootstrap/img/full-screen-image-4.jpg') }}">
      <nav class="navbar navbar-expand-lg navbar-transparent navbar-absolute">
         <div class="navbar-wrapper">
-            <a class="navbar-brand" href="#pablo">{{ __('MATHEMATICS CHALLENGE PLATFORM') }}</a>
             <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" aria-controls="navigation-index" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-bar burger-lines"></span>
                 <span class="navbar-toggler-bar burger-lines"></span>
@@ -24,7 +23,7 @@
                             <div class="card-body ">
                                 <div class="card-body">
                                     <div class="form-group">
-                                        <label for="email" class="col-md-6 col-form-label">{{ __('E-Mail Address') }}</label>
+                                        <label for="email" class="col-md-6 col-form-label">{{ __('E-mail Address') }}</label>
             
                                         <div class="col-md-14">
                                             <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email', 'admin@lightbp.com') }}" required autocomplete="email" autofocus>
@@ -71,7 +70,6 @@
                                             {{ __('Create account') }}
                                         </a>
                                     </div>
-                                    
                                 </div>
                             </div>
                         </div>
