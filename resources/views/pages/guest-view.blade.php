@@ -1,17 +1,13 @@
-@extends('layouts.app', ['activePage' => 'dashboard', 'title' => 'Home', 'navName' => 'Dashboard', 'activeButton' => 'laravel'])
+@extends('layouts.app', ['activePage' => 'guest-view', 'title' => 'Guest Page', 'navName' => 'Guest View', 'activeButton' => 'laravel'])
 
 @section('content')
+<!--Guest view to be accessed by users not logged into the system-->
     <div class="content">
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-12">
-                    <!--Displays welcome message of logged in user-->
-                <h3>Welcome, {{ Auth::user()->name}}!</h3>
-                </div>
-                <div class="col-md-12">
                     <div class="card">
                         <div class="card-header">
-                            <!--Displays upcoming challenges-->
                            <h4 class="card-title"><b>{{__('Upcoming Challenges') }}</b></h4>
                         </div>
                         <div class="card-body table-full-width table-responsive">
@@ -21,6 +17,7 @@
                                 <td>Start Date</td>
                             </thead>
                             <tbody>
+                              <!--Loop for displaying upcoming challenges-->
                               @foreach($upcoming_challenges as $challenge)
                                <tr>
                                  <td>{{ $challenge->challenge_name }}</td>
@@ -32,7 +29,7 @@
                 </div>
             </div>
         </div>
-        <!--Displays metrics of registered participants, schools and challenges-->
+        <!--Metrics for registered schools, challenges and participants-->
             <div class="col-md-4">
                        <div class="card text-center custom-card bg-info text-dark" style="border-radius: 0;">
                            <div class="card-header" style="font-size: 1.2rem; font-weight: bold;">
@@ -63,17 +60,9 @@
                           </div>
                        </div>
             </div>
+            <div class="text-center">
+                    <a href="{{ route('welcome') }}" class="btn btn-primary">{{ __('Return To Welcome Page') }}</a>
+                </div>
         </div>
     </div>
 @endsection
-
-@push('js')
-    <script type="text/javascript">
-        $(document).ready(function() {
-            // Javascript method's body can be found in assets/js/demos.js
-
-            demo.showWelcomeNotification();
-
-        });
-    </script>
-@endpush
