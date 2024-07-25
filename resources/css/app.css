@@ -3,4 +3,20 @@
     src: url(fonts/montserrat/Montserrat-SemiBold.ttf);
 }
 
+.custom-card {
+    background-color: #009fd9; 
+    color: #fff; 
+    margin-bottom: 20px;
+}
+
+.custom-card .card-title {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.custom-card .card-text {
+    font-size: 24px;
+    font-weight: bold;
+}
+
 
