@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class School extends Model
+class school extends Model
 {
     use HasFactory;
 
@@ -25,5 +25,6 @@ class School extends Model
     public function representatives()
     {
         return $this->hasMany(Representatives::class);
+      
     }
 }

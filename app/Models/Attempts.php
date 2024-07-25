@@ -26,4 +26,5 @@ class Attempts extends Model
         return $this->hasMany(Participants::class);
     }
 
+
 }

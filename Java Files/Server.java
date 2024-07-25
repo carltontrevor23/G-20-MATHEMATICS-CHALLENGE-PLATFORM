@@ -68,7 +68,28 @@ class Challenge{
         this.endDate = endDate;
     }
 }
-
+/managing all database connections through one class.
+//static methods for instances of connections
+class Database{
+    private static final String DB_URL = "jdbc:mysql://localhost:3306/mathematics-challenge";
+    private static final String DB_USER = "root";
+    private static final String DB_PASSWORD = "";
+    static {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            System.err.println("jdbc not found");
+            e.printStackTrace();
+        }
+    }
+    public static Connection getConnection() throws SQLException{
+        return  DriverManager.getConnection(DB_URL,DB_USER,DB_PASSWORD);
+    }
+}
+/*
+   Main server class handling communication with clients.
+   Uses multithreading to handle multiple client connections simultaneously.
+*/
 public class Server {
     private static final int PORT = 12345;
     private static Map<String, School> schools = new HashMap<>();

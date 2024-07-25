@@ -18,4 +18,5 @@ class Challenges extends Model
         'duration',
         'number_of_questions',
     ];
+
 }
