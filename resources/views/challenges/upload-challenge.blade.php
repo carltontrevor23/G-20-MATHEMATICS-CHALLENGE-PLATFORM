@@ -2,6 +2,7 @@
 
 @section('content')
 
+<!--View for uploading challenge paramters and challenge Excel files-->
 <div class="container">
     
     <h2><b>{{ __('Upload New Challenge') }}</b></h2>
