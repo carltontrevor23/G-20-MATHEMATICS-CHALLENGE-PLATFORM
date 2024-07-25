@@ -8,14 +8,23 @@ use Illuminate\Database\Eloquent\Model;
 class school extends Model
 {
     use HasFactory;
-    protected $fillable = ['name','district','registration_number','email','representative_name'];
+
+    protected $fillable = [
+        'name',
+        'district',
+        'registration_number',
+        'representative_name',
+        'email',
+        'representative_password',
+    ];
+
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+    ];
 
     public function representatives()
     {
-        return $this->hasMany(Representative::class);
-    }
-    public function participants()
-    {
-        return $this->hasMany(Participant::class);
+        return $this->hasMany(Representatives::class);
+      
     }
 }

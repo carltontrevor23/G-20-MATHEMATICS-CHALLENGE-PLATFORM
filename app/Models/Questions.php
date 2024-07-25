@@ -8,10 +8,22 @@ use Illuminate\Database\Eloquent\Model;
 class Questions extends Model
 {
     use HasFactory;
-    protected $fillable = ['question_text'];
-    public function answers()
+
+    protected $table='questions';
+
+    protected $fillable=[
+        'challenge_id',
+        'question',
+        'answer',
+        'marks',
+    ];
+    public function challenge ()
+    {
+        return $this->belongsTo(Challenge::class);
+    }
+    public function answers ()
     {
         return $this->hasMany(Answer::class);
-
+   
     }
 }
