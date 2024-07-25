@@ -1,15 +1,13 @@
-<div class="sidebar" data-color="grey" data-image="{{ asset('light-bootstrap/img/sidebar-5.jpg') }}">
-    <!--
-Tip 1: You can change the color of the sidebar using: data-color="purple | blue | green | orange | red"
-
-Tip 2: you can also add an image using data-image tag
--->
+<div class="sidebar" data-color="azure" data-image="{{ asset('light-bootstrap/img/bg-image-2.webp') }}">
+    
     <div class="sidebar-wrapper">
         <div class="logo">
-            <a href="http://127.0.0.1:8000/home" class="simple-text">
-                {{ __("Mathematics Challenge Platform") }}
+            
+            <a href="http://127.0.0.1:8000/home" class="simple-text logo-normal">
+                <img src="{{ asset('light-bootstrap/img/logo-website-final.png')  }}" alt="logo" style="height:120px; vertical-align:left;">
             </a>
         </div>
+        <!--Menu items that appear on the sidebar-->
         <ul class="nav">
             <li class="nav-item @if($activePage == 'dashboard') active @endif">
                 <a class="nav-link" href="{{route('dashboard')}}">
@@ -17,42 +15,34 @@ Tip 2: you can also add an image using data-image tag
                     <p>{{ __("Dashboard") }}</p>
                 </a>
             </li>
-        
-                <div class="collapse @if($activeButton =='laravel') show @endif" id="laravelExamples">
             <li class="nav-item @if($activePage == 'user') active @endif">
                 <a class="nav-link" href="{{route('profile.edit')}}">
                     <i class="nc-icon nc-single-02"></i>
                         <p>{{ __("User Profile") }}</p>
                 </a>
             </li>
-            <li class="nav-item @if($activePage == 'user-management') active @endif">
-                <a class="nav-link" href="{{route('user.index')}}">
+            <li class="nav-item @if($activePage == 'schools') active @endif">
+                <a class="nav-link" href="{{route('schools.display')}}">
+                    <i class="nc-icon nc-backpack"></i>
+                            <p>{{ __("Schools") }}</p>
+                </a>
+            </li>
+            <li class="nav-item @if($activePage == 'representatives') active @endif">
+                <a class="nav-link" href="{{route('schools.display-representatives')}}">
                     <i class="nc-icon nc-circle-09"></i>
                             <p>{{ __("Representatives") }}</p>
                 </a>
             </li>
-            <li class="nav-item @if($activePage == 'table') active @endif">
-                <a class="nav-link" href="{{route('page.index', 'table')}}">
+            <li class="nav-item @if($activePage == 'challenges') active @endif">
+                <a class="nav-link" href="{{route('challenges.display', 'challenges')}}">
                     <i class="nc-icon nc-notes"></i>
                     <p>{{ __("Challenges") }}</p>
                 </a>
             </li>
-            <li class="nav-item @if($activePage == 'uploadschools') active @endif">
-                <a class="nav-link" href="{{route('page.index', 'uploadschools')}}">
-                    <i class="nc-icon nc-paper-2"></i>
-                    <p>{{ __("Upload Schools") }}</p>
-                </a>
-            </li>
-            <li class="nav-item @if($activePage == 'maps') active @endif">
-                <a class="nav-link" href="{{route('page.index', 'maps')}}">
-                    <i class="nc-icon nc-chart-bar-32"></i>
+            <li class="nav-item @if($activePage == 'analytics') active @endif">
+                <a class="nav-link" href="{{route('analytics.display', 'analytics')}}">
+                    <i class="nc-icon nc-layers-3"></i>
                     <p>{{ __("Analytics") }}</p>
-                </a>
-            </li>
-            <li class="nav-item @if($activePage == 'notifications') active @endif">
-                <a class="nav-link" href="{{route('page.index', 'notifications')}}">
-                    <i class="nc-icon nc-bell-55"></i>
-                    <p>{{ __("Notifications") }}</p>
                 </a>
             </li>
         </ul>
