@@ -68,7 +68,59 @@ class EmailUtility {
         }
 
     }
-    
+    public static void sendEmailWithAttachment(String to, String subject, String body, String attachmentFilePath)
+            throws MessagingException, IOException {
+
+        Properties properties = new Properties();
+        properties.put("mail.smtp.host","smtp.gmail.com");
+        properties.put("mail.smtp.port", "465");
+        properties.put("mail.smtp.auth", "true");
+        properties.put("mail.smtp.starttls.enable", "true");
+        properties.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+        //properties.put("mail.smtp.socketFactory.fallback", "false");
+        properties.put("mail.smtp.ssl.enable", "true"); // Enable SSL
+        properties.put("mail.smtp.ssl.trust", "smtp.gmail.com");
+        properties.put("mail.smtp.ssl.protocols", "TLSv1.2");
+        properties.put("mail.smtp.debug", "true");
+
+        Session session = Session.getInstance(properties, new Authenticator() {
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(USERNAME, PASSWORD);
+            }
+        });
+        try {
+            Message message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(FROM_EMAIL));
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
+            message.setSubject(subject);
+
+            // Create the message body part
+            MimeBodyPart messageBodyPart = new MimeBodyPart();
+            messageBodyPart.setText(body);
+
+            // Create the attachment body part
+            MimeBodyPart attachmentBodyPart = new MimeBodyPart();
+            attachmentBodyPart.attachFile(new File(attachmentFilePath));
+
+            // Create multipart
+            Multipart multipart = new MimeMultipart();
+            multipart.addBodyPart(messageBodyPart);
+            multipart.addBodyPart(attachmentBodyPart);
+
+            // Set the multipart as the message's content
+            message.setContent(multipart);
+
+            // Send message
+            Transport.send(message);
+            System.out.println("Email with attachment sent successfully!");
+
+        } catch (MessagingException | IOException e) {
+            System.err.println("Error sending email with attachment: " + e.getMessage());
+            throw e; // Rethrow the exception to propagate it to the caller
+        }
+    }
+}
+
 // school and its details or attributes as an entity
 class School {
     private String registration_number;
@@ -530,7 +582,123 @@ public class server {
             out.flush();
         }
 
-                private void confirmParticipant(String[] parts) {
+        private void attemptChallenge(String[] parts) throws IOException {
+            if (parts.length < 2) {
+                out.println("Incomplete Command request");
+                return;
+            }
+            String challengeId = parts[1];
+            if (challenges.containsKey(challengeId)) {
+                try (Connection connection = Database.getConnection()) {
+                    // Check the number of attempts
+                    String checkAttemptsQuery = "SELECT COUNT(*) AS attempt_count FROM attempts WHERE username = ? AND challenge_id = ?";
+                    PreparedStatement checkStatement = connection.prepareStatement(checkAttemptsQuery);
+                    checkStatement.setString(1, loggedInPupil.username);
+                    checkStatement.setString(2, challengeId);
+                    ResultSet resultSet = checkStatement.executeQuery();
+                    int attempts = 0;
+                    if (resultSet.next()) {
+                        attempts = resultSet.getInt("attempt_count");
+                    }
+
+                    if (attempts >= 3) {
+                        out.println("You have already attempted this challenge 3 times.");
+                        return;
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                out.println("Starting Challenge " + challenges.get(challengeId) + ".....");
+
+                // Retrieve random 10 questions from the database
+                List<Question> questions = getRandomQuestions(challengeId);
+                currentChallenge = new ChallengeAttempt(questions);
+                StringBuilder questionsAttempted = new StringBuilder();
+                StringBuilder answersGiven = new StringBuilder();
+                Instant start = Instant.now();
+
+                for (int i = 0; i < questions.size(); i++) {
+                    Question question = questions.get(i);
+                    out.println((i + 1) + ". " + question.getQuestionText());
+                    out.println("Enter your answer:");
+                    String answer = in.readLine();
+                    currentChallenge.setAnswer(question.getId(), answer);
+                    questionsAttempted.append(question.getQuestionText()).append("\n");
+                    answersGiven.append(answer).append("\n");
+
+                }
+                Instant end = Instant.now();
+                Duration timeTaken = Duration.between(start, end);
+                int score = currentChallenge.calculateScore();
+                out.println("Challenge complete! Your score: " + score);
+                try (Connection connection = Database.getConnection()) {
+                    String insertAttemptQuery = "INSERT INTO attempts (username, challenge_id, score, questions_attempted) VALUES (?, ?, ?, ?)";
+
+                    PreparedStatement insertStatement = connection.prepareStatement(insertAttemptQuery);
+                    insertStatement.setString(1, loggedInPupil.username);
+                    insertStatement.setString(2, challengeId);
+                    insertStatement.setInt(3, score);
+                    insertStatement.setString(4, questionsAttempted.toString());
+                    insertStatement.executeUpdate();
+
+                    try {
+                        // Create PDF with attempt details
+                        String pdfFilePath = createPdf(loggedInPupil.username, score, questionsAttempted.toString(), answersGiven.toString(), timeTaken.toString());
+
+                        // Send email with the PDF attachment
+                        String recipientEmail = loggedInPupil.email;
+                        String subject = "Challenge Attempt Details";
+                        String body = "Dear " + loggedInPupil.username + ",\n\nThank you for using the Mathematics Challenge Platform. Please find attached the details of your recent challenge attempt.";
+
+                        EmailUtility.sendEmailWithAttachment(recipientEmail, subject, body, pdfFilePath);
+                        // Optionally, delete the PDF file after sending
+                        // File pdfFile = new File(pdfFilePath);
+                        // pdfFile.delete();
+
+                        System.out.println("Email sent successfully!");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        out.println("Error creating or accessing PDF file.");
+                    } catch (MessagingException e) {
+                        e.printStackTrace();
+                        out.println("Error sending email with challenge details.");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        out.println("Unknown error occurred.");
+                    }
+
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    out.println("Error processing the challenge attempt.");
+                }
+
+            } else {
+                out.println("Challenge not found");
+            }
+        }
+
+        private List<Question> getRandomQuestions(String challengeId) {
+            List<Question> questions = new ArrayList<>();
+            String query = "SELECT * FROM questions WHERE challenge_id = ? ORDER BY RAND() LIMIT 10";
+            try (Connection connection = Database.getConnection();
+                 PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+                preparedStatement.setString(1, challengeId);
+                ResultSet resultSet = preparedStatement.executeQuery();
+
+                while (resultSet.next()) {
+                    String id = resultSet.getString("id");
+                    String questionText = resultSet.getString("question");
+                    String correctAnswer = resultSet.getString("answer");
+                    Question question = new Question(id, questionText, correctAnswer);
+                    questions.add(question);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            return questions;
+        }
+
+        private void confirmParticipant(String[] parts) {
             if (parts.length < 3) {
                 out.println("Incomplete Command request");
                 return;
@@ -627,5 +795,83 @@ public class server {
         }
     }
     //nested class for question details
-    
+    static class Question{
+        private String id;
+        private String questionText;
+        private String correctAnswer;
+        public Question(String id, String questionText, String correctAnswer){
+            this.id = id;
+            this.questionText =questionText;
+            this.correctAnswer = correctAnswer;
+        }
+        public String getId(){
+            return id;
+        }
+        public  String getQuestionText(){
+            return questionText;
+        }
+        public String getCorrectAnswer(){
+            return correctAnswer;
+        }
+    }
+    static class ChallengeAttempt{
+        private List<Question> questions;
+        private Map<String, String> answers;
+        private long startTime;
+        private long endTime;
+        private int score;
+        public ChallengeAttempt(List<Question> questions){
+            this.questions = questions;
+            this.answers = new HashMap<>();
+            this.startTime = System.currentTimeMillis();
+            this.endTime = startTime +(30*60*1000);
+            this.score = 0;
+        }
+        public List<Question>getQuestions(){
+            return questions;
+        }
+        public void setAnswer(String questionId,String answer){
+            answers.put(questionId,answer);
+        }
+        public String getAnswer(String questionId){
+            return answers.get(questionId);
+        }
+        public int calculateScore() {
+            for (Question question : questions) {
+                String givenAnswer = answers.get(question.getId());
+                if (givenAnswer != null) {
+                    if (givenAnswer.equalsIgnoreCase(question.getCorrectAnswer())) {
+                        score += 5;
+                    } else if (!"not sure".equalsIgnoreCase(givenAnswer)) {
+                        score -= 3;
+                    }
+                }
+            }
+            return score;
+        }
+        public boolean isTimeUp() {
+            return System.currentTimeMillis() > endTime;
+        }
+    }
+    private static String createPdf(String username, int score, String questionsAttempted, String answersGiven, String timeTaken) throws IOException {
+        String pdfFilePath = "C:\\Users\\hp\\Documents\\Challenge PDF Files" + username + "_challenge_details.pdf";
+
+        Document document = new Document();
+        try {
+            PdfWriter.getInstance(document, new FileOutputStream(pdfFilePath));
+            document.open();
+            document.add(new Paragraph("Challenge Attempt Details"));
+            document.add(new Paragraph("Username: " + username));
+            document.add(new Paragraph("Score: " + score));
+            document.add(new Paragraph("Time Taken: " + timeTaken));
+            document.add(new Paragraph("Questions Attempted:\n" + questionsAttempted));
+            document.add(new Paragraph("Answers Given:\n" + answersGiven));
+        } catch (DocumentException e) {
+            e.printStackTrace();
+        } finally {
+            document.close();
+        }
+
+        return pdfFilePath;
+    }
 }
