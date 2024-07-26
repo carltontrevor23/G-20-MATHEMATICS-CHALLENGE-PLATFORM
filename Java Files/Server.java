@@ -24,9 +24,6 @@ import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.PdfWriter;
 import java.io.FileOutputStream;
 
-
-
-
 //a class to handle the sending of the emails to throughout the program cycle
 class EmailUtility {
     private static final String SMTP_SERVER = "smtp.gmail.com";
@@ -120,7 +117,6 @@ class EmailUtility {
         }
     }
 }
-
 // school and its details or attributes as an entity
 class School {
     private String registration_number;
@@ -652,8 +648,8 @@ public class server {
 
                         EmailUtility.sendEmailWithAttachment(recipientEmail, subject, body, pdfFilePath);
                         // Optionally, delete the PDF file after sending
-                        // File pdfFile = new File(pdfFilePath);
-                        // pdfFile.delete();
+                         File pdfFile = new File(pdfFilePath);
+                         pdfFile.delete();
 
                         System.out.println("Email sent successfully!");
                     } catch (IOException e) {
