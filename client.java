@@ -1,9 +1,12 @@
-import java.io.*;
-import java.net.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
 import java.util.Scanner;
 
-public class Client {
-    private static final String SERVER_ADDRESS = "localhost"; // Change this to the server's IP address if running on a different machine
+public class client {
+    private static final String SERVER_ADDRESS = "127.0.0.1";
     private static final int SERVER_PORT = 12345;
 
     public static void main(String[] args) {
@@ -12,31 +15,29 @@ public class Client {
              PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
              Scanner scanner = new Scanner(System.in)) {
 
-            // Read welcome message and commands from the server
-            String line;
-            while ((line = in.readLine()) != null && !line.isEmpty()) {
-                System.out.println(line);
-            }
+            Thread listenerThread = new Thread(() -> {
+                try {
+                    String serverResponse;
+                    while ((serverResponse = in.readLine()) != null) {
+                        System.out.println(serverResponse);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+            listenerThread.start();
 
-            // Interact with the server based on user input
+            String command;
             while (true) {
-                System.out.print("> ");
-                String command = scanner.nextLine();
+                command = scanner.nextLine();
                 out.println(command);
-
+                out.flush();
                 if (command.equalsIgnoreCase("exit")) {
                     break;
                 }
-
-                // Read and display the server's response
-                while ((line = in.readLine()) != null && !line.isEmpty()) {
-                    System.out.println(line);
-                }
             }
-
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 }
-
